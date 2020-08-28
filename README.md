@@ -3,10 +3,10 @@ CMPE295B: Master's project Adaptive and Heuristic AI enabled IoT Edge for high-r
 
 # File Structure
 
-Adaptive-and-Heuristic-AI-enabled-IoT-Edge-for-high-risk-and-rural-patients
-|_machinelearning
-  |__respiratory
-  |__fall
-|_mobileapp  
-|_webapp
+Adaptive-and-Heuristic-AI-enabled-IoT-Edge-for-high-risk-and-rural-patients<br>
+|_machinelearning<br>
+  |__respiratory<br>
+  |__fall<br>
+|_mobileapp  <br>
+|_webapp<br>
   
