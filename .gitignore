@@ -1,0 +1,19 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+#Front end
+healthcare-ai-fe/node_modules
+
+#Android App
+HealthCareAIApp/.gradle
+HealthCareAIApp/local.properties
+HealthCareAIApp/.idea/caches
+HealthCareAIApp/.idea/libraries
+HealthCareAIApp/.idea/modules.xml
+HealthCareAIApp/.idea/workspace.xml
+HealthCareAIApp/.idea/navEditor.xml
+HealthCareAIApp/.idea/assetWizardSettings.xml
+HealthCareAIApp/.DS_Store
+HealthCareAIApp/build
+HealthCareAIApp/captures
+HealthCareAIApp/.externalNativeBuild
+HealthCareAIApp/.cxx

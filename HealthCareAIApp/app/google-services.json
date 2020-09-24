@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "977299648154",
+    "firebase_url": "https://healthcareai-cmpe295.firebaseio.com",
+    "project_id": "healthcareai-cmpe295",
+    "storage_bucket": "healthcareai-cmpe295.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977299648154:android:1705b308a569c1fb09b923",
+        "android_client_info": {
+          "package_name": "com.cmpe.healthcareai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "977299648154-amrpfficvq4r5odrh3qsdgknm1hei5j8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMssWHvsze0yxdJ6UDGzaeRm2KWU0s-ys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "977299648154-amrpfficvq4r5odrh3qsdgknm1hei5j8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
