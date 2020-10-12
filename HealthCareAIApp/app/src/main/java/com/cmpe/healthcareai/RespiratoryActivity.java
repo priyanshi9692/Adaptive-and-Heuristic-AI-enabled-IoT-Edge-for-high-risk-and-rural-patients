@@ -70,21 +70,13 @@ public class RespiratoryActivity extends AppCompatActivity {
                 Uri uri = data.getData();
                 selectAudioBtn.setEnabled(false);
                 selectAudioBtn.setText("Loading Audio file...");
-                try {
-                    predictWithTFLite(uri);
-                } catch (FileFormatNotSupportedException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (WavFileException e) {
-                    e.printStackTrace();
-                }
+                predictWithTFLite(uri);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void predictWithTFLite(Uri uri) throws FileFormatNotSupportedException, IOException, WavFileException {
+    private void predictWithTFLite(Uri uri)  {
         selectAudioBtn.setText("Processing Audio file...");
         // code to predict goes here
         String src = uri.getPath();
@@ -97,7 +89,7 @@ public class RespiratoryActivity extends AppCompatActivity {
             Python.start(new AndroidPlatform(this));
         Python py = Python.getInstance();
         PyObject pyobj = py.getModule("featureExtraction");
-        PyObject obj = pyobj.callAttr("build_feat","/mnt/sdcard/Audiodata/107_2b4_Pl_mc_AKGC417L_0.wav", "lstm_5s_21.h5");
+        PyObject obj = pyobj.callAttr("build_feat","107_2b4_Pl_mc_AKGC417L_0.wav", "lstm_5s_21.h5");
         Log.d("out:", obj.toString());
         if(obj.toString().equals("0")){
             Log.d("Diagnosis:", "No abnormalities were detected");
