@@ -1,17 +1,44 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.chaquo.python'        // Add this line
 android {
     compileSdkVersion 29
     buildToolsVersion "30.0.2"
-
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     defaultConfig {
+        python{
+            pip{
+                install "numpy"
+                install "librosa"
+                install "tensorflow"
+                install "scipy"
+            }
+        }
+
+        sourceSets{
+            main{
+                python{
+                    srcDirs = ["src/main/python"]
+                }
+            }
+        }
         applicationId "com.cmpe.healthcareai"
         minSdkVersion 19
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters "armeabi-v7a", "x86"
+        }
+
+        python{
+            buildPython "C:/Users/Thasleem/AppData/Local/Programs/Python/Python39/python.exe"
+        }
     }
 
     buildTypes {
@@ -19,6 +46,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
     }
 }
 
@@ -26,6 +54,9 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation files('libs\\jlibrosa-1.0.2-SNAPSHOT-jar-with-dependencies.jar')
+    implementation files('libs\\jlibrosa-1.0.2-SNAPSHOT-javadoc.jar')
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -33,4 +64,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:17.5.0'
     implementation 'com.google.firebase:firebase-auth:19.3.2'
     implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
+    implementation 'org.tensorflow:tensorflow-lite:+'
 }
