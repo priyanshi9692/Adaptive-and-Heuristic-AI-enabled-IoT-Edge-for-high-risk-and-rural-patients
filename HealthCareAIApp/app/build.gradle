@@ -37,7 +37,7 @@ android {
         }
 
         python{
-            buildPython "C:/Users/Thasleem/AppData/Local/Programs/Python/Python39/python.exe"
+            buildPython "/opt/anaconda3/bin/python3"
         }
     }
 
@@ -65,4 +65,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:19.3.2'
     implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
     implementation 'org.tensorflow:tensorflow-lite:+'
+    implementation 'androidx.cardview:cardview:1.0.0'
 }
