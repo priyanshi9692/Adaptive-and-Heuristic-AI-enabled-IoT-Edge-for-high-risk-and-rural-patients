@@ -2,8 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.chaquo.python'        // Add this line
 android {
-    compileSdkVersion 29
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 28
+    buildToolsVersion "30.0.0"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -13,7 +13,6 @@ android {
             pip{
                 install "numpy"
                 install "librosa"
-                install "tensorflow"
                 install "scipy"
             }
         }
@@ -27,7 +26,7 @@ android {
         }
         applicationId "com.cmpe.healthcareai"
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -37,9 +36,14 @@ android {
         }
 
         python{
-            buildPython "/opt/anaconda3/bin/python3"
+            buildPython "C:/Users/Thasleem/AppData/Local/Programs/Python/Python39/python.exe"
         }
     }
+
+    aaptOptions {
+        noCompress "tflite"
+    }
+
 
     buildTypes {
         release {
@@ -65,5 +69,4 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:19.3.2'
     implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
     implementation 'org.tensorflow:tensorflow-lite:+'
-    implementation 'androidx.cardview:cardview:1.0.0'
 }
