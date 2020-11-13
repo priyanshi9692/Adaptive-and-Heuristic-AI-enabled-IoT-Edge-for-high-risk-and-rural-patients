@@ -1,18 +1,29 @@
 package com.cmpe.healthcareai;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.res.AssetFileDescriptor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
+import org.tensorflow.lite.Interpreter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 
 public class FallActivity extends AppCompatActivity {
 
@@ -22,6 +33,7 @@ public class FallActivity extends AppCompatActivity {
     int sensorDataCount = 500;
     String[] sensorData = new String[sensorDataCount];
     int count = 0;
+    Interpreter tflite;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +48,15 @@ public class FallActivity extends AppCompatActivity {
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         Log.d( "-----","sensors set");
+
+//        if(!Python.isStarted())
+//            Python.start(new AndroidPlatform(this));
+
+        try {
+            tflite = new Interpreter(loadModelFile());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     public void onResume() {
@@ -61,20 +82,19 @@ public class FallActivity extends AppCompatActivity {
             if(count ==sensorDataCount){
                 mSensorManager.unregisterListener(sensorEventListener);
                 Log.d( "-----","sensors unregisterListener as sensorDataCount records read");
-              List<List<Double>> result = new ArrayList<>();
+              List<List<Float>> result = new ArrayList<>();
 
-                result = predictFallOrNormal(sensorData);
+                result = calculateFeatures(sensorData);
                 int count=0;
                 String str = new String();
-                for( List<Double> feature: result){
-                    for(double f: feature){
+                for( List<Float> feature: result){
+                    for(float f: feature){
                         str += f+" ";
                         count++;
                     }
                 }
-                Log.d("Features: ","Count: "+count+" "+ str);
-
-                //calculate features, then call model
+                Log.d("features:",str);
+                doInference(result);
 
             }
             else {
@@ -92,9 +112,35 @@ public class FallActivity extends AppCompatActivity {
                 count=count+1;
             }
         }
+
     };
 
-    public List<List<Double>> predictFallOrNormal(String[] sensorData){
+
+    public int doInference(List<List<Float>> features) {
+            float[][] inputFeatures = new float[1][features.get(0).size()];
+        Log.d("Predicting: ","Fall or No-Fall");
+
+                for(int j=0; j<features.get(0).size();j++){
+                    inputFeatures[0][j] = features.get(0).get(j);
+
+
+   }
+
+
+                float[][] output= new float[1][1];
+                tflite.run(inputFeatures,output);
+                 float inferredValue = output[0][0];
+                if(inferredValue>0.5){
+                    Log.d("Result: ","Fall possible");
+                 return 1;
+
+                }else{
+                    Log.d("Result: ","No fall ");
+                    return 0;
+                }
+    }
+
+    public List<List<Float>> calculateFeatures(String[] sensorData){
 
         List<List<String>> output = new ArrayList<>();
         int j = 0;
@@ -106,93 +152,93 @@ public class FallActivity extends AppCompatActivity {
                 output.add(Arrays.asList(sensorData[i].split(" ")));
             }
         }
-        double [] X = new double[output.size()];
-        double [] Y = new double[output.size()];
-        double [] Z = new double[output.size()];
-        double[] magnitude = new double[output.size()];
-        double [] ymag = new double[output.size()];
-        double [] TA = new double[output.size()];
-        //ArrayList<Double> Zi = new ArrayList<>();
+        float [] X = new float[output.size()];
+        float [] Y = new float[output.size()];
+        float [] Z = new float[output.size()];
+        float[] magnitude = new float[output.size()];
+        float [] ymag = new float[output.size()];
+        float [] TA = new float[output.size()];
+        //ArrayList<float> Zi = new ArrayList<>();
         int k = 0;
         for(int i =0; i<output.size(); i++){
 
-                X[k] = Double.parseDouble(output.get(i).get(2));
-                Y[k] = Double.parseDouble(output.get(i).get(3));
-                Z[k] = Double.parseDouble(output.get(i).get(4));
+                X[k] = Float.parseFloat(output.get(i).get(2));
+                Y[k] = Float.parseFloat(output.get(i).get(3));
+                Z[k] = Float.parseFloat(output.get(i).get(4));
                 k++;
         }
         Log.d("----", "Predicting: "+ "Xlength "+X.length+ " Ylength"+ Y.length+" Zlength"+Z.length);
         for(int i =0; i<output.size(); i++){
-            double x = X[i];
-            double y = Y[i];
-            double z = Z[i];
+            float x = X[i];
+            float y = Y[i];
+            float z = Z[i];
             magnitude[i] = magnitude(x,y,z);
         }
         for(int i = 0; i<output.size(); i++){
-            ymag[i] = (Y[i])/Math.sqrt(magnitude[i]);
+            ymag[i] = (Y[i])/(float)Math.sqrt(magnitude[i]);
         }
         for(int i=0; i<output.size(); i++){
-            TA[i] = Math.asin(Math.toRadians(ymag[i]));
+            TA[i] = (float)Math.asin(Math.toRadians(ymag[i]));
         }
-        double averageX = calMean(X);
-        double averageY = calMean(Y);
-        double averageZ = calMean(Z);
-        double medianX = calMedian(X.length, X);
-        double medianY = calMedian(Y.length, Y);
-        double medianZ = calMedian(Z.length, Z);
-        double stdX = calStd(X);
-        double stdY = calStd(Y);
-        double stdZ = calStd(Z);
-        double skewX = calSkew(X, X.length);
-        double skewY = calSkew(Y, Y.length);
-        double skewZ = calSkew(Z, Z.length);
-        double kurtX = calKurtosis(X,X.length);
-        double kurtY = calKurtosis(Y,Y.length);
-        double kurtZ = calKurtosis(Z,Z.length);
-        double minX = minValue(X);
-        double minY = minValue(Y);
-        double minZ = minValue(Z);
-        double maxX = maxValue(X);
-        double maxY = maxValue(Y);
-        double maxZ = maxValue(Z);
-        double slope = calSlope(minX, maxX,minY,maxY, minZ, maxZ);
-        double meanTA = calMean(TA);
-        double stdTA = calStd(TA);
-        double skewTA = calSkew(TA, TA.length);
-        double kurtosisTA = calKurtosis(TA, TA.length);
-        double absX = absValue(X);
-        double absY = absValue(Y);
-        double absZ = absValue(Z);
-        double abs_meanX =meanAbs(X);
-        double abs_meanY =meanAbs(Y);
-        double abs_meanZ =meanAbs(Z);
-        double abs_medianX = medianAbs(X.length, X);
-        double abs_medianY = medianAbs(Y.length, Y);
-        double abs_medianZ = medianAbs(Z.length, Z);
-        double abs_stdX = stdAbs(X);
-        double abs_stdY = stdAbs(Y);
-        double abs_stdZ = stdAbs(Z);
-        double abs_skewX = skewAbs(X, X.length);
-        double abs_skewY = skewAbs(Y, Y.length);
-        double abs_skewZ = skewAbs(Z, Z.length);
-        double abs_kurtX = kurtAbs(X, X.length);
-        double abs_kurtY = kurtAbs(Y, Y.length);
-        double abs_kurtZ = kurtAbs(Z, Z.length);
-        double abs_minX = absMinValue(X);
-        double abs_minY = absMinValue(Y);
-        double abs_minZ = absMinValue(Z);
-        double abs_maxX = absMaxValue(X);
-        double abs_maxY = absMaxValue(Y);
-        double abs_maxZ = absMaxValue(Z);
-        double abs_slope = calSlope(abs_minX, abs_maxX, abs_minY, abs_maxY, abs_minZ, abs_maxZ);
-        double mean_magnitude = calMean(magnitude);
-        double std_magnitude = calStd(magnitude);
-        double min_mag = minValue(magnitude);
-        double max_mag = maxValue(magnitude);
-        double diffMinMaxMag = max_mag - min_mag;
-        double zcr_Mag = 0;
-        double avgResAcc = (1/magnitude.length)*(calSum(magnitude));
-        List<Double> feature = new ArrayList<>();
+        float averageX = calMean(X);
+        float averageY = calMean(Y);
+        float averageZ = calMean(Z);
+        float medianX = calMedian(X.length, X);
+        float medianY = calMedian(Y.length, Y);
+        float medianZ = calMedian(Z.length, Z);
+        float stdX = calStd(X);
+        float stdY = calStd(Y);
+        float stdZ = calStd(Z);
+        float skewX = calSkew(X, X.length);
+        float skewY = calSkew(Y, Y.length);
+        float skewZ = calSkew(Z, Z.length);
+        float kurtX = calKurtosis(X,X.length);
+        float kurtY = calKurtosis(Y,Y.length);
+        float kurtZ = calKurtosis(Z,Z.length);
+        float minX = minValue(X);
+        float minY = minValue(Y);
+        float minZ = minValue(Z);
+        float maxX = maxValue(X);
+        float maxY = maxValue(Y);
+        float maxZ = maxValue(Z);
+        float slope = calSlope(minX, maxX,minY,maxY, minZ, maxZ);
+        float meanTA = calMean(TA);
+        float stdTA = calStd(TA);
+        float skewTA = calSkew(TA, TA.length);
+        float kurtosisTA = calKurtosis(TA, TA.length);
+        float absX = absValue(X);
+        float absY = absValue(Y);
+        float absZ = absValue(Z);
+        float abs_meanX =meanAbs(X);
+        float abs_meanY =meanAbs(Y);
+        float abs_meanZ =meanAbs(Z);
+        float abs_medianX = medianAbs(X.length, X);
+        float abs_medianY = medianAbs(Y.length, Y);
+        float abs_medianZ = medianAbs(Z.length, Z);
+        float abs_stdX = stdAbs(X);
+        float abs_stdY = stdAbs(Y);
+        float abs_stdZ = stdAbs(Z);
+        float abs_skewX = skewAbs(X, X.length);
+        float abs_skewY = skewAbs(Y, Y.length);
+        float abs_skewZ = skewAbs(Z, Z.length);
+        float abs_kurtX = kurtAbs(X, X.length);
+        float abs_kurtY = kurtAbs(Y, Y.length);
+        float abs_kurtZ = kurtAbs(Z, Z.length);
+        float abs_minX = absMinValue(X);
+        float abs_minY = absMinValue(Y);
+        float abs_minZ = absMinValue(Z);
+        float abs_maxX = absMaxValue(X);
+        float abs_maxY = absMaxValue(Y);
+        float abs_maxZ = absMaxValue(Z);
+        float abs_slope = calSlope(abs_minX, abs_maxX, abs_minY, abs_maxY, abs_minZ, abs_maxZ);
+        float mean_magnitude = calMean(magnitude);
+        float std_magnitude = calStd(magnitude);
+        float min_mag = minValue(magnitude);
+        float max_mag = maxValue(magnitude);
+        float diffMinMaxMag = max_mag - min_mag;
+        float zcr_Mag = 0;
+        float avgResAcc = (1/magnitude.length)*(calSum(magnitude));
+        List<Float> feature = new ArrayList<>();
         // Average values
         feature.add(averageX);
         feature.add(averageY);
@@ -275,22 +321,22 @@ public class FallActivity extends AppCompatActivity {
         feature.add(zcr_Mag);
         feature.add(avgResAcc);
 
-        List<List<Double>> features = new ArrayList<>();
+        List<List<Float>> features = new ArrayList<>();
          features.add(feature);
          return features;
     }
     // add array elements
-    public double calSum(double[] arr){
-        double sum =0;
+    public float calSum(float[] arr){
+        float sum =0;
         for(int i =0; i<arr.length; i++){
             sum+=arr[i];
         }
         return sum;
     }
     // Calculate Average of array
-    public  double calMean(double[] arr){
-        double average = 0;
-        double sum = 0;
+    public  float calMean(float[] arr){
+        float average = 0;
+        float sum = 0;
         int length = arr.length;
         for(int i =0; i<arr.length; i++){
             sum+=arr[i];
@@ -300,8 +346,8 @@ public class FallActivity extends AppCompatActivity {
     }
 
     // Calculate median of array
-    public double calMedian(int n, double[] arr){
-        double median=0;
+    public float calMedian(int n, float[] arr){
+        float median=0;
         int m = 0;
         if(n%2==1)
         {
@@ -319,23 +365,23 @@ public class FallActivity extends AppCompatActivity {
 
     // calculate standard deviation of array
 
-    public  double calStd(double[] arr){
-        double standardDeviation = 0.0;
+    public  float calStd(float[] arr){
+        float standardDeviation = 0.0f;
         int length = arr.length;
-        double mean = calMean(arr);
+        float mean = calMean(arr);
 
-        for(double num: arr) {
+        for(float num: arr) {
             standardDeviation += Math.pow(num - mean, 2);
         }
 
-        return Math.sqrt(standardDeviation/length);
+        return (float)Math.sqrt(standardDeviation/length);
     }
 
     //calculate skew of an array
-    public double calSkew(double [] arr, int n)
+    public float calSkew(float [] arr, int n)
     {
         // Find skewness using above formula
-        double sum = 0;
+        float sum = 0;
         for (int i = 0; i < n; i++){
             sum = ((arr[i] - calMean(arr)) * (arr[i] - calMean(arr)) * (arr[i] - calMean(arr)));
         }
@@ -346,13 +392,13 @@ public class FallActivity extends AppCompatActivity {
     }
 
     //calculate kurtosis of an array
-    public double calKurtosis(double[] arr, int n){
-        double secondMoment = 0;
-        double fourthMoment = 0;
-        double kurt =0;
+    public float calKurtosis(float[] arr, int n){
+        float secondMoment = 0;
+        float fourthMoment = 0;
+        float kurt =0;
         float secSum =0;
         float forSum = 0;
-        double mean = calMean(arr);
+        float mean = calMean(arr);
         for(int i = 0; i<n; i++){
             secSum += Math.pow(arr[i]-mean,2);
         }
@@ -361,16 +407,16 @@ public class FallActivity extends AppCompatActivity {
             forSum+= Math.pow(arr[i]-mean,4);
         }
         fourthMoment = forSum/n;
-        kurt = fourthMoment/Math.pow(secondMoment,2);
+        kurt = fourthMoment/(float)Math.pow(secondMoment,2);
         return kurt;
     }
     // calculation magnitude of an array
-    public double magnitude(double x, double y, double z){
-        return (Math.sqrt(x*x+y*y+z*z));
+    public float magnitude(float x, float y, float z){
+        return ((float)Math.sqrt(x*x+y*y+z*z));
     }
     // calculate minimum value in array
-    public double minValue(double[] arr){
-        double min = arr[0];
+    public float minValue(float[] arr){
+        float min = arr[0];
         for(int i =1; i<arr.length; i++){
             if(arr[i]<min){
                 min = arr[i];
@@ -379,8 +425,8 @@ public class FallActivity extends AppCompatActivity {
         return min;
     }
     // calculate maximum value in array
-    public double maxValue(double[] arr){
-        double max = arr[0];
+    public float maxValue(float[] arr){
+        float max = arr[0];
         for(int i =1; i<arr.length; i++){
             if(arr[i]>max){
                 max = arr[i];
@@ -390,17 +436,17 @@ public class FallActivity extends AppCompatActivity {
     }
 
     // calculate absolute value
-    public double absValue(double[] arr){
-        double sum =0;
+    public float absValue(float[] arr){
+        float sum =0;
         for(int i =0; i<arr.length; i++){
-            double num = Math.abs(arr[i]-calMean(arr));
+            float num = Math.abs(arr[i]-calMean(arr));
             sum +=num;
         }
         return sum/arr.length;
     }
     // Absolute mean value
-    public double meanAbs(double[] arr){
-        double sum =0;
+    public float meanAbs(float[] arr){
+        float sum =0;
         for(int i =0; i<arr.length; i++){
             sum+=Math.abs(arr[i]);
         }
@@ -408,8 +454,8 @@ public class FallActivity extends AppCompatActivity {
     }
 
     // Absolute median value
-    public double medianAbs(int n, double[] arr) {
-        double median = 0;
+    public float medianAbs(int n, float[] arr) {
+        float median = 0;
         int m = 0;
         if (n % 2 == 1) {
             m = (int) ((n + 1 / 2) - 1);
@@ -423,22 +469,22 @@ public class FallActivity extends AppCompatActivity {
 
     }
     // Absolute standard deviation value
-    public double stdAbs(double[] arr){
-        double standardDeviation = 0.0;
+    public float stdAbs(float[] arr){
+        float standardDeviation = 0.0f;
         int length = arr.length;
-        double mean = meanAbs(arr);
+        float mean = meanAbs(arr);
 
-        for(double num: arr) {
+        for(float num: arr) {
             standardDeviation += Math.pow(Math.abs(num) - mean, 2);
         }
 
-        double std = Math.sqrt(standardDeviation/length);
+        float std = (float)Math.sqrt(standardDeviation/length);
         return std;
     }
     // Absolute skew value
-    public double skewAbs(double [] arr, int n) {
+    public float skewAbs(float [] arr, int n) {
         // Find skewness using above formula
-        double sum = 0;
+        float sum = 0;
         for (int i = 0; i < n; i++){
             sum = ((Math.abs(arr[i]) - meanAbs(arr)) * (Math.abs(arr[i]) - meanAbs(arr)) * (Math.abs(arr[i]) - meanAbs(arr)));
         }
@@ -449,13 +495,13 @@ public class FallActivity extends AppCompatActivity {
 
     }
     // Absolute kurtosis value
-    public double kurtAbs(double[] arr, int n){
-        double secondMoment = 0;
-        double fourthMoment = 0;
-        double kurt =0;
+    public float kurtAbs(float[] arr, int n){
+        float secondMoment = 0;
+        float fourthMoment = 0;
+        float kurt =0;
         float secSum =0;
         float forSum = 0;
-        double mean = meanAbs(arr);
+        float mean = meanAbs(arr);
         for(int i = 0; i<n; i++){
             secSum += Math.pow(Math.abs(arr[i])-mean,2);
         }
@@ -464,13 +510,13 @@ public class FallActivity extends AppCompatActivity {
             forSum+= Math.pow(Math.abs(arr[i])-mean,4);
         }
         fourthMoment = forSum/n;
-        kurt = fourthMoment/Math.pow(secondMoment,2);
+        kurt = fourthMoment/(float)Math.pow(secondMoment,2);
         return kurt;
     }
 
     // calculate absolute minimum value in array
-    public double absMinValue(double[] arr){
-        double min = Math.abs(arr[0]);
+    public float absMinValue(float[] arr){
+        float min = Math.abs(arr[0]);
         for(int i =1; i<arr.length; i++){
             if(Math.abs(arr[i])<min){
                 min = Math.abs(arr[i]);
@@ -479,8 +525,8 @@ public class FallActivity extends AppCompatActivity {
         return min;
     }
     // calculate absolute maximum value in array
-    public  double absMaxValue(double[] arr){
-        double max = Math.abs(arr[0]);
+    public  float absMaxValue(float[] arr){
+        float max = Math.abs(arr[0]);
         for(int i =1; i<arr.length; i++){
             if(Math.abs(arr[i])>max){
                 max = Math.abs(arr[i]);
@@ -490,16 +536,18 @@ public class FallActivity extends AppCompatActivity {
     }
 
     // calculating slope
-    public  double calSlope(double xmin, double xmax,double ymin,double ymax, double zmin, double zmax){
-        return Math.sqrt(Math.pow(xmax-xmin,2 )+Math.pow(ymax-ymin,2 )+Math.pow(zmax-zmin,2 ));
+    public  float calSlope(float xmin, float xmax,float ymin,float ymax, float zmin, float zmax){
+        return (float)Math.sqrt(Math.pow(xmax-xmin,2 )+Math.pow(ymax-ymin,2 )+Math.pow(zmax-zmin,2 ));
     }
 
-//    private double doInference(float age, float gender, float bmi, float children, float smoker, float region_val) {
-//        float[][] inputVal = {{age},{gender},{bmi},{children},{smoker},{region_val}};
-//        float[][] output= new float[1][1];
-//        // tflite.run(inputVal,output);
-//        float inferredValue= (float) (output[0][0] * sqrt(1.43451672 * pow(10,8)) + 13092.01280714);
-//        return  inferredValue;
-//    }
+
+private MappedByteBuffer loadModelFile() throws IOException {
+    AssetFileDescriptor fileDescriptor = this.getAssets().openFd("ml_fall_model.tflite");
+    FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
+    FileChannel fileChannel = inputStream.getChannel();
+    long startOffset = fileDescriptor.getStartOffset();
+    long declareLength = fileDescriptor.getDeclaredLength();
+    return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength);
+}
 
 }
