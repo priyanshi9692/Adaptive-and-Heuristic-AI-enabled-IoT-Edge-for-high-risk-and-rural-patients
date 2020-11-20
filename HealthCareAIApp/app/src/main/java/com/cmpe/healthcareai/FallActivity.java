@@ -117,19 +117,35 @@ public class FallActivity extends AppCompatActivity {
 
 
     public int doInference(List<List<Float>> features) {
+
             float[][] inputFeatures = new float[1][features.get(0).size()];
         Log.d("Predicting: ","Fall or No-Fall");
 
                 for(int j=0; j<features.get(0).size();j++){
                     inputFeatures[0][j] = features.get(0).get(j);
 
-
    }
+//        float[][] inputFeatures2 = {{(float)-6.62052011e+00, (float) 1.34338394e-01, (float) 5.44009304e+00, (float)-7.05642414e+00,
+//                (float) 1.45847678e-01,  (float)6.55142975e+00, (float) 2.82630420e+00,  (float)3.53958464e+00,
+//                (float)2.44531322e+00,  (float)6.08589053e-01, (float) 3.03506345e-01, (float)-6.42171919e-01,
+//                (float)3.75969601e+00,  (float)4.82274008e+00,  (float)3.31983399e+00, (float)-1.89244366e+01,
+//                (float)-1.78726215e+01, (float)-2.09896111e+00,  (float)8.99242020e+00,  (float)1.49794235e+01,
+//                (float) 1.89458313e+01, (float) 4.79738579e+01,  (float)3.71429734e-02,  (float)4.81371254e-01,
+//                (float) 1.01612806e+00, (float) 3.82407355e+00, (float) 1.69290018e+00,  (float)1.73630643e+00,
+//                (float) 1.80542231e+00, (float) 6.70434904e+00,  (float)1.80088198e+00, (float) 5.51859522e+00,
+//                (float) 7.05654526e+00,  (float)1.76798269e-01,  (float)6.55142975e+00, (float) 2.62113833e+00,
+//                (float) 3.04987454e+00,(float)  2.26247549e+00, (float)-1.69757158e-01,  (float)2.10545969e+00,
+//                (float) -3.01179558e-01, (float) 3.31551576e+00, (float) 4.10205603e+00,  (float)3.61691046e+00,
+//                (float)1.67997479e-02,  (float)3.59081710e-03, (float) 1.53589796e-03,(float)  1.89244366e+01,
+//                (float) 1.78726215e+01,  (float)1.89458313e+01, (float) 3.21820946e+01,  (float)9.99254227e+01,
+//                (float) 5.68263092e+01, (float) 6.95191765e+00, (float) 7.47370667e+02,(float)  7.40418762e+02,
+//                (float)  0.00000000e+00,(float)  9.99254227e+01}};
 
 
                 float[][] output= new float[1][1];
                 tflite.run(inputFeatures,output);
                  float inferredValue = output[0][0];
+                 Log.d("Value: ", String.valueOf(inferredValue));
                 if(inferredValue>0.5){
                     Log.d("Result: ","Fall possible");
                  return 1;
