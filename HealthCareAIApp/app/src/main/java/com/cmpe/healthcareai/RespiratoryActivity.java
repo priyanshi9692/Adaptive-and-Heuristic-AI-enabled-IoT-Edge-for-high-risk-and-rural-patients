@@ -1,6 +1,7 @@
 package com.cmpe.healthcareai;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -9,11 +10,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,11 +37,26 @@ public class RespiratoryActivity extends AppCompatActivity {
 
     Button selectAudioBtn;
     Interpreter tflite;
+
+    TextView cvTitle;
+    TextView cvResult;
+    ProgressBar progressBar;
+    CardView card;
+
+    Python py = null;
+    PyObject pyobj = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_respiratory);
         selectAudioBtn = findViewById(R.id.selectAudioBtn);
+        cvTitle = findViewById(R.id.card_view_title);
+        cvResult = findViewById(R.id.card_view_result);
+        progressBar = findViewById(R.id.progress_bar);
+        card = findViewById(R.id.cardView);
+        card.setVisibility(View.INVISIBLE);
+        cvResult.setVisibility(View.INVISIBLE);
         //verifyStoragePermissions(RespiratoryActivity.this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -83,58 +101,70 @@ public class RespiratoryActivity extends AppCompatActivity {
                 Uri uri = data.getData();
                 selectAudioBtn.setEnabled(false);
                 selectAudioBtn.setText("Loading Audio file...");
-                predictWithTFLite(uri);
+                card.setVisibility(View.VISIBLE);
+                cvTitle.setText("Predicting...");
+                cvResult.setText("");
+                progressBar.setVisibility(View.VISIBLE);
+                //predictWithTFLite(uri);
+                new DoMlInBackground().execute(uri);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void predictWithTFLite(Uri uri) {
-        selectAudioBtn.setText("Processing Audio file...");
-        // code to predict goes here
-        String src = uri.getPath();
-        String[] path = src.split(":");
-
-        Log.d("audioPath", src);
-
-
-        Python py = Python.getInstance();
-        PyObject pyobj = py.getModule("featureExtraction");
-        PyObject obj = pyobj.callAttr("build_feat",path[1]);
-        //Log.d("out:", obj.toString());
-
-
-        //DataType inpType = tflite.getInputTensor(0).dataType();
-       // Log.d("inpType",inpType.toString());
-        float[][][] feat = obj.toJava(float[][][].class);
-
-        //DataType outType = tflite.getOutputTensor(0).dataType();
-       // Log.d("outType",outType.toString());
-
-        float[][] outprob= new float[1][4];
-        tflite.run(feat,outprob);
-        int predictedClass = findMaximumIndex(outprob);
-        Log.d("Class", Integer.toString(predictedClass));
-        Log.d("outprob0",String.format("%.8f",outprob[0][0]));
-        Log.d("outprob1",String.format("%.8f",outprob[0][1]));
-        Log.d("outprob2",String.format("%.8f",outprob[0][2]));
-        Log.d("outprob3",String.format("%.8f",outprob[0][3]));
-
-
-        /*if(obj.toString().equals("0")){
-            Log.d("Diagnosis:", "No abnormalities were detected");
-        }
-        else if(obj.toString().equals("1")){
-            Log.d("Diagnosis:", "Contains crackles");
-        }
-        else if(obj.toString().equals("2")){
-            Log.d("Diagnosis:", "Contains wheeze");
-        }
-        else{
-            Log.d("Diagnosis:", "contains both crackle and wheeze");
-        }*/
-
-    }
+//    private void predictWithTFLite(Uri uri) {
+//        selectAudioBtn.setText("Processing Audio file...");
+//        // code to predict goes here
+//        String src = uri.getPath();
+//        String[] path = src.split(":");
+//
+//        Log.d("audioPath", src);
+//
+//
+//        Python py = Python.getInstance();
+//        PyObject pyobj = py.getModule("featureExtraction");
+//        PyObject obj = pyobj.callAttr("build_feat",path[1]);
+//        //Log.d("out:", obj.toString());
+//
+//
+//        //DataType inpType = tflite.getInputTensor(0).dataType();
+//       // Log.d("inpType",inpType.toString());
+//        float[][][] feat = obj.toJava(float[][][].class);
+//
+//        //DataType outType = tflite.getOutputTensor(0).dataType();
+//       // Log.d("outType",outType.toString());
+//
+//        float[][] outprob= new float[1][4];
+//        tflite.run(feat,outprob);
+//        int predictedClass = findMaximumIndex(outprob);
+//        Log.d("Class", Integer.toString(predictedClass));
+//        Log.d("outprob0",String.format("%.8f",outprob[0][0]));
+//        Log.d("outprob1",String.format("%.8f",outprob[0][1]));
+//        Log.d("outprob2",String.format("%.8f",outprob[0][2]));
+//        Log.d("outprob3",String.format("%.8f",outprob[0][3]));
+//
+//
+//        if(obj.toString().equals("0")){
+//            Log.d("Diagnosis:", "No abnormalities were detected");
+//            cvResult.setText("No abnormalities were detected");
+//        }
+//        else if(obj.toString().equals("1")){
+//            Log.d("Diagnosis:", "Contains crackles");
+//            cvResult.setText("Contains crackles");
+//        }
+//        else if(obj.toString().equals("2")){
+//            Log.d("Diagnosis:", "Contains wheeze");
+//            cvResult.setText("Contains wheeze");
+//        }
+//        else{
+//            Log.d("Diagnosis:", "contains both crackle and wheeze");
+//            cvResult.setText("Contains both crackle and wheeze");
+//        }
+//        cvTitle.setText("Result");
+//        cvResult.setVisibility(View.VISIBLE);
+//        progressBar.setVisibility(View.INVISIBLE);
+//
+//    }
 
     private static int findMaximumIndex(float[][] a)
     {
@@ -163,4 +193,70 @@ public class RespiratoryActivity extends AppCompatActivity {
         long declareLength = fileDescriptor.getDeclaredLength();
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength);
     }
+
+    private class DoMlInBackground extends AsyncTask<Uri, Integer, String> {
+        protected String doInBackground(Uri... urls) {
+            if (py == null){
+                py = Python.getInstance();
+                pyobj = py.getModule("featureExtraction");
+            }
+
+
+            String src = urls[0].getPath();
+            String[] path = src.split(":");
+            PyObject obj = pyobj.callAttr("build_feat",path[1]);
+            Log.d("audioPath", src);
+
+
+
+            //Log.d("out:", obj.toString());
+
+
+            //DataType inpType = tflite.getInputTensor(0).dataType();
+            // Log.d("inpType",inpType.toString());
+            float[][][] feat = obj.toJava(float[][][].class);
+
+            //DataType outType = tflite.getOutputTensor(0).dataType();
+            // Log.d("outType",outType.toString());
+
+            float[][] outprob= new float[1][4];
+            tflite.run(feat,outprob);
+            int predictedClass = findMaximumIndex(outprob);
+            Log.d("Class", Integer.toString(predictedClass));
+            Log.d("outprob0",String.format("%.8f",outprob[0][0]));
+            Log.d("outprob1",String.format("%.8f",outprob[0][1]));
+            Log.d("outprob2",String.format("%.8f",outprob[0][2]));
+            Log.d("outprob3",String.format("%.8f",outprob[0][3]));
+            return obj.toString();
+        }
+
+
+
+        protected void onPostExecute(String result) {
+            if(result.equals("0")){
+                Log.d("Diagnosis:", "No abnormalities were detected");
+                cvResult.setText("No abnormalities were detected");
+            }
+            else if(result.equals("1")){
+                Log.d("Diagnosis:", "Contains crackles");
+                cvResult.setText("Contains crackles");
+            }
+            else if(result.equals("2")){
+                Log.d("Diagnosis:", "Contains wheeze");
+                cvResult.setText("Contains wheeze");
+            }
+            else{
+                Log.d("Diagnosis:", "contains both crackle and wheeze");
+                cvResult.setText("Contains both crackle and wheeze");
+            }
+            cvTitle.setText("Result");
+            cvResult.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
+            selectAudioBtn.setText("Select another audio file");
+            selectAudioBtn.setEnabled(true);
+        }
+    }
+
+
 }
+
