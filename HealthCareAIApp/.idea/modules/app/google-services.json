@@ -1,0 +1,72 @@
+{
+  "project_info": {
+    "project_number": "977299648154",
+    "firebase_url": "https://healthcareai-cmpe295.firebaseio.com",
+    "project_id": "healthcareai-cmpe295",
+    "storage_bucket": "healthcareai-cmpe295.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977299648154:android:1705b308a569c1fb09b923",
+        "android_client_info": {
+          "package_name": "com.cmpe.healthcareai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "977299648154-8bqli8ei86lapcdkik53cjipd692ejrl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cmpe.healthcareai",
+            "certificate_hash": "06877be145f1ff02caceac3e7a051a472b11cdb3"
+          }
+        },
+        {
+          "client_id": "977299648154-5l0ek0qoin2e3jh511e4f55r3rhdqev6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cmpe.healthcareai",
+            "certificate_hash": "a13e921d71cbb2d068ed780ef5542eca1a71374f"
+          }
+        },
+        {
+          "client_id": "977299648154-obqp0tj2v19kgldhu9026dovq19nq6l9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cmpe.healthcareai",
+            "certificate_hash": "84659e7c7c1cc8ce3d9381e64cafee77793f4cad"
+          }
+        },
+        {
+          "client_id": "977299648154-fle0f78iruj6jmb38qm0r419j3asoj5n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cmpe.healthcareai",
+            "certificate_hash": "735d61c035ab3da70abe823c1e9a915fdf64455b"
+          }
+        },
+        {
+          "client_id": "977299648154-amrpfficvq4r5odrh3qsdgknm1hei5j8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMssWHvsze0yxdJ6UDGzaeRm2KWU0s-ys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "977299648154-amrpfficvq4r5odrh3qsdgknm1hei5j8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

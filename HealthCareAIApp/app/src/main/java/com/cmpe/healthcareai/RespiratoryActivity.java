@@ -227,7 +227,7 @@ public class RespiratoryActivity extends AppCompatActivity {
             Log.d("outprob1",String.format("%.8f",outprob[0][1]));
             Log.d("outprob2",String.format("%.8f",outprob[0][2]));
             Log.d("outprob3",String.format("%.8f",outprob[0][3]));
-            return obj.toString();
+            return Integer.toString(predictedClass);
         }
 
 
