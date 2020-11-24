@@ -149,6 +149,8 @@ public class FallActivity extends AppCompatActivity {
 //                Log.d("Result: ", "No fall ");
 //                return 0;
 //            }
+        Toast.makeText(FallActivity.this, "Result: "+result,
+                Toast.LENGTH_SHORT).show();
         return result;
     }
 
