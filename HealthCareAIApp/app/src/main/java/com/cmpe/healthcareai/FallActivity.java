@@ -128,14 +128,16 @@ public class FallActivity extends AppCompatActivity {
             tflite.run(inputFeatures, output);
             float inferredValue = output[0][0];
             Log.d("Value: ", String.valueOf(inferredValue));
-            if (inferredValue > 0.5) {
-                Log.d("Result: ", "Fall possible");
-                return 1;
-
-            } else {
-                Log.d("Result: ", "No fall ");
-                return 0;
-            }
+            int result = Math.round(inferredValue);
+            Log.d("Result: ", String.valueOf(result));
+//            if (inferredValue < 0.75) {
+//                Log.d("Result: ", "Fall possible");
+//                return 1;
+//            } else {
+//                Log.d("Result: ", "No fall ");
+//                return 0;
+//            }
+        return result;
     }
 
         public List<List<Float>> calculateFeatures (String[]sensorData){

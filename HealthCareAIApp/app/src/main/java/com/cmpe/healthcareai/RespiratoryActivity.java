@@ -1,5 +1,6 @@
 package com.cmpe.healthcareai;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
@@ -26,14 +27,28 @@ import org.tensorflow.lite.Interpreter;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class RespiratoryActivity extends AppCompatActivity {
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
     Button selectAudioBtn;
     Interpreter tflite;
@@ -64,8 +79,8 @@ public class RespiratoryActivity extends AppCompatActivity {
             }
         }
 
-        Toast.makeText(RespiratoryActivity.this, "In Respiratory activity",
-                Toast.LENGTH_LONG).show();
+//        Toast.makeText(RespiratoryActivity.this, "In Respiratory activity",
+//                Toast.LENGTH_LONG).show();
 
         if(!Python.isStarted())
             Python.start(new AndroidPlatform(this));
@@ -81,8 +96,8 @@ public class RespiratoryActivity extends AppCompatActivity {
 
 
     public void onSelectAudioBtnClicked(View view) {
-        Toast.makeText(RespiratoryActivity.this, "Btn clicked",
-                Toast.LENGTH_SHORT).show();
+//        Toast.makeText(RespiratoryActivity.this, "Btn clicked",
+//                Toast.LENGTH_SHORT).show();
         Intent intent_upload = new Intent();
         intent_upload.setType("*/*");
         intent_upload.setAction(Intent.ACTION_GET_CONTENT);
@@ -233,30 +248,61 @@ public class RespiratoryActivity extends AppCompatActivity {
 
 
         protected void onPostExecute(String result) {
+            String dataToInsert = null;
             if(result.equals("0")){
-                Log.d("Diagnosis:", "No abnormalities were detected");
-                cvResult.setText("No abnormalities were detected");
+                dataToInsert = "No abnormalities were detected";
+                Log.d("Diagnosis:", dataToInsert);
+                cvResult.setText(dataToInsert);
             }
             else if(result.equals("1")){
-                Log.d("Diagnosis:", "Contains crackles");
-                cvResult.setText("Contains crackles");
+                dataToInsert = "Contains crackles";
+                Log.d("Diagnosis:", dataToInsert);
+                cvResult.setText(dataToInsert);
             }
             else if(result.equals("2")){
-                Log.d("Diagnosis:", "Contains wheeze");
-                cvResult.setText("Contains wheeze");
+                dataToInsert = "Contains wheeze";
+                Log.d("Diagnosis:", dataToInsert);
+                cvResult.setText(dataToInsert);
             }
             else{
-                Log.d("Diagnosis:", "contains both crackle and wheeze");
-                cvResult.setText("Contains both crackle and wheeze");
+                dataToInsert = "Contains both crackle and wheeze";
+                Log.d("Diagnosis:", dataToInsert);
+                cvResult.setText(dataToInsert);
             }
             cvTitle.setText("Result");
             cvResult.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
             selectAudioBtn.setText("Select another audio file");
             selectAudioBtn.setEnabled(true);
+            addDataToFirestore(dataToInsert);
         }
     }
 
+    void addDataToFirestore(String result){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        Map<String,Object> mapToAdd = new HashMap<>();
+        mapToAdd.put("email",user.getEmail());
+        mapToAdd.put("result",result);
+        mapToAdd.put("time", FieldValue.serverTimestamp());
 
+        db.collection("respiratory")
+                .add(mapToAdd)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("TAG", "DocumentSnapshot added with ID: " + documentReference.getId());
+                        Toast.makeText(RespiratoryActivity.this, "Checkup result synced to cloud",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("TAG", "Error adding document", e);
+                        Toast.makeText(RespiratoryActivity.this, "Error syncing checkup result to cloud",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 }
 
