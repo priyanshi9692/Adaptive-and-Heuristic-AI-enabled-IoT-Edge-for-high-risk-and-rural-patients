@@ -98,6 +98,7 @@
     <orderEntry type="library" scope="TEST" name="Gradle: javax.inject:javax.inject:1@jar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: androidx.test.ext:junit:1.1.1@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: androidx.test.espresso:espresso-core:3.2.0@aar" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: androidx.multidex:multidex-instrumentation:2.0.0@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: androidx.test:runner:1.2.0@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: androidx.test:core:1.2.0@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: androidx.test:monitor:1.2.0@aar" level="project" />
@@ -124,6 +125,7 @@
     <orderEntry type="library" name="Gradle: com.google.code.findbugs:jsr305:3.0.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: io.opencensus:opencensus-contrib-grpc-metrics:0.11.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: io.opencensus:opencensus-api:0.11.0@jar" level="project" />
+    <orderEntry type="library" name="Gradle: androidx.multidex:multidex:2.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.appcompat:appcompat:1.1.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.cardview:cardview:1.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.firebaseui:firebase-ui-auth:6.2.0@aar" level="project" />
