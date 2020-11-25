@@ -30,7 +30,7 @@ public class FallActivity extends AppCompatActivity {
     SensorManager mSensorManager;
     Sensor mAccelerometer;
     Sensor mGyroscope;
-    int sensorDataCount =500;
+    int sensorDataCount =100;
     String[] sensorData = new String[sensorDataCount];
     int count = 0;
     Interpreter tflite;
@@ -128,14 +128,17 @@ public class FallActivity extends AppCompatActivity {
             tflite.run(inputFeatures, output);
             float inferredValue = output[0][0];
             Log.d("Value: ", String.valueOf(inferredValue));
+            int result = Math.round(inferredValue);
+            Log.d("Result: ", String.valueOf(result));
             if (inferredValue > 0.5) {
-                Log.d("Result: ", "Fall possible");
+                Log.d("Result: ", " It's Fall");
                 return 1;
 
             } else {
-                Log.d("Result: ", "No fall ");
+                Log.d("Result: ", "No Fall");
                 return 0;
             }
+//        return result;
     }
 
         public List<List<Float>> calculateFeatures (String[]sensorData){
@@ -553,7 +556,7 @@ public class FallActivity extends AppCompatActivity {
 
 
 private MappedByteBuffer loadModelFile() throws IOException {
-    AssetFileDescriptor fileDescriptor = this.getAssets().openFd("ml_fall_model.tflite");
+    AssetFileDescriptor fileDescriptor = this.getAssets().openFd("ml_fall_new_model.tflite");
     FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
     FileChannel fileChannel = inputStream.getChannel();
     long startOffset = fileDescriptor.getStartOffset();
