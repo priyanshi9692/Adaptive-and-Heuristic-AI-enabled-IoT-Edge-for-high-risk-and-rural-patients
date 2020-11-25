@@ -34,7 +34,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.telephony.SmsManager;
 
 public class FallActivity extends AppCompatActivity {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -42,6 +44,7 @@ public class FallActivity extends AppCompatActivity {
     Sensor mAccelerometer;
     Sensor mGyroscope;
     int sensorDataCount =100;
+    String phoneNumber = "4087149213";
     String[] sensorData = new String[sensorDataCount];
     int count = 0;
     Interpreter tflite;
@@ -69,7 +72,22 @@ public class FallActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
     }
+    public int sendSMS(String no, String msg) {
 
+        try {
+            //Getting intent and PendingIntent instance
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+//Get the SmsManager instance and call the sendTextMessage method to send message
+            SmsManager sms = SmsManager.getDefault();
+            sms.sendTextMessage(no, null, msg, pi, null);
+        }
+        catch (Exception ex){
+            Log.d( "-----","SMS - error");
+        }
+        return 1;
+    }
     public void onResume() {
         Log.d( "-----","onresume -- sensor to be set");
         super.onResume();
@@ -136,20 +154,30 @@ public class FallActivity extends AppCompatActivity {
 
    }
         float[][] output = new float[1][1];
-            tflite.run(inputFeatures, output);
-            float inferredValue = output[0][0];
-            Log.d("Value: ", String.valueOf(inferredValue));
-            int result = Math.round(inferredValue);
-            Log.d("Result: ", String.valueOf(result));
-            if (inferredValue > 0.5) {
-                Log.d("Result: ", " It's Fall");
-                return 1;
+        tflite.run(inputFeatures, output);
+        float inferredValue = output[0][0];
+        Log.d("Value: ", String.valueOf(inferredValue));
+        int result = Math.round(inferredValue);
 
-            } else {
-                Log.d("Result: ", "No Fall");
-                return 0;
-            }
-       return result;
+        Toast.makeText(FallActivity.this, "Result: "+result,
+                Toast.LENGTH_SHORT).show();
+        Log.d("Result: ", String.valueOf(result));
+        String smsMsg = "";
+        if (inferredValue > 0.5) {
+            Log.d("Result: ", " It's Fall");
+            smsMsg = " It's Fall";
+            addDataToFirestore("FALL");
+            sendSMS(phoneNumber,smsMsg);
+            return 1;
+
+        } else {
+            Log.d("Result: ", "No Fall");
+            smsMsg = "No Fall";
+            addDataToFirestore("NO_FALL");
+            sendSMS(phoneNumber, smsMsg);
+            return 0;
+        }
+
 
     }
 

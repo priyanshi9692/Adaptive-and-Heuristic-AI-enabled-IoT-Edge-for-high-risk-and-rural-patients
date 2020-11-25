@@ -43,12 +43,14 @@ import java.nio.channels.FileChannel;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.telephony.SmsManager;
 
 public class RespiratoryActivity extends AppCompatActivity {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-
+    String phoneNumber = "4087149213";
 
     Button selectAudioBtn;
     Interpreter tflite;
@@ -94,7 +96,22 @@ public class RespiratoryActivity extends AppCompatActivity {
 
     }
 
+    public int sendSMS(String no, String msg) {
 
+        try {
+            //Getting intent and PendingIntent instance
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+//Get the SmsManager instance and call the sendTextMessage method to send message
+            SmsManager sms = SmsManager.getDefault();
+            sms.sendTextMessage(no, null, msg, pi, null);
+        }
+        catch (Exception ex){
+            Log.d( "-----","SMS - error");
+        }
+        return 1;
+    }
     public void onSelectAudioBtnClicked(View view) {
 //        Toast.makeText(RespiratoryActivity.this, "Btn clicked",
 //                Toast.LENGTH_SHORT).show();
@@ -275,6 +292,7 @@ public class RespiratoryActivity extends AppCompatActivity {
             selectAudioBtn.setText("Select another audio file");
             selectAudioBtn.setEnabled(true);
             addDataToFirestore(dataToInsert);
+            sendSMS(phoneNumber,dataToInsert);
         }
     }
 
