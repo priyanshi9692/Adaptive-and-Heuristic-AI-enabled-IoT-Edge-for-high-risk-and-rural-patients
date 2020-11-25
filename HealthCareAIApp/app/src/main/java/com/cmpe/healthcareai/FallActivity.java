@@ -10,11 +10,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import org.tensorflow.lite.Interpreter;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,11 +31,13 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class FallActivity extends AppCompatActivity {
-
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     SensorManager mSensorManager;
     Sensor mAccelerometer;
     Sensor mGyroscope;
@@ -138,7 +149,8 @@ public class FallActivity extends AppCompatActivity {
                 Log.d("Result: ", "No Fall");
                 return 0;
             }
-//        return result;
+       return result;
+
     }
 
         public List<List<Float>> calculateFeatures (String[]sensorData){
@@ -564,5 +576,31 @@ private MappedByteBuffer loadModelFile() throws IOException {
     return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength);
 }
 
+    void addDataToFirestore(String result){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        Map<String,Object> mapToAdd = new HashMap<>();
+        mapToAdd.put("email",user.getEmail());
+        mapToAdd.put("result",result);
+        mapToAdd.put("time", FieldValue.serverTimestamp());
+
+        db.collection("fall")
+                .add(mapToAdd)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("TAG", "DocumentSnapshot added with ID: " + documentReference.getId());
+                        Toast.makeText(FallActivity.this, "Fall/No-Fall result synced to cloud",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("TAG", "Error adding document", e);
+                        Toast.makeText(FallActivity.this, "Error syncing Fall/No-Fall result to cloud",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 }
 

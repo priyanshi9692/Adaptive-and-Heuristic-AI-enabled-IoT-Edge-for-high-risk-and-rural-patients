@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,8 +18,10 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.FirebaseUserMetadata;
 
 import java.util.Arrays;
 import java.util.List;
@@ -70,6 +73,18 @@ public class MainActivity extends AppCompatActivity {
     private void userLoggedInSetup() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         userGreetingTv.setText("Hello "+user.getDisplayName()+"!");
+        //check first log-in
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUserMetadata metadata = auth.getCurrentUser().getMetadata();
+        if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
+            // The user is new, show them a fancy intro screen!
+            Toast.makeText(MainActivity.this, "new user",
+                    Toast.LENGTH_LONG).show();
+        } else {
+            // This is an existing user, show them a welcome back screen.
+            Toast.makeText(MainActivity.this, "old user",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     public void onRespiratoryBtnClicked(View view) {
@@ -115,4 +130,6 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 }
