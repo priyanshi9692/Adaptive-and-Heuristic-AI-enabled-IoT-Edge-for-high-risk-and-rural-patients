@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { Route, Switch } from "react-router-dom";
 import Dashboard from "./dashboard";
 import UserProfile from "./profile";
+import TestResults from "./test_results";
 import firebase from "firebase";
 
 class Body extends Component {
@@ -38,6 +39,7 @@ class Body extends Component {
             <div className="card m-2">
               <Route path="/" component={Dashboard} exact />
               <Route path="/profile" component={UserProfile} exact />
+              <Route path="/result" component={TestResults} exact />
             </div>
           </Switch>
         </div>
