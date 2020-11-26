@@ -24,7 +24,6 @@ class TestResults extends Component {
     //Get data from Fall Documents
     var fall_data = await fall_collection.where("email","==",firebase.auth().currentUser.email).get();
     const data = fall_data.docs.map(doc => doc.data());
-    console.log(data);
     const respiratory_collection = db.collection("respiratory")
     var respiratory_data = await respiratory_collection.where("email", "==",firebase.auth().currentUser.email).get();
     const resp_data = respiratory_data.docs.map(doc => doc.data());
@@ -34,8 +33,6 @@ class TestResults extends Component {
           respData: resp_data
         }
       );
-      console.log(this.state.fallData);
-      console.log(this.state.respData);
   }
 
   renderTableData() {
@@ -58,7 +55,6 @@ class TestResults extends Component {
     })
  }
  renderRespTableData() {
-    console.log(this.state.respData);
     return this.state.respData.map((respData, index) => {
        const { email, result, time} = respData //destructuring
        var d = new Date(time.seconds * 1000);

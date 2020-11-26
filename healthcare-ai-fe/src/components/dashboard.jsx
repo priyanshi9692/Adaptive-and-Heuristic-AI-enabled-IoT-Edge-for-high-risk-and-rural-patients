@@ -24,15 +24,12 @@ class Dashboard extends Component {
     //Get data from Fall Documents
     var fall_data = await fall_collection.where("email", "==", firebase.auth().currentUser.email).get();
     const data = fall_data.docs.map(doc => doc.data());
-    console.log(data.length); // array of cities objects
-    console.log(data);
     data.sort(function (x, y) {
       return x.time.seconds - y.time.seconds;
     })
     var count = 0;
 
     for (var i = 0; i < data.length; i++) {
-      console.log(new Date(data[i].time.seconds * 1000))
       if (data[i].result == "FALL") {
         count++;
       }
@@ -54,8 +51,7 @@ class Dashboard extends Component {
     //Get size of the array (No. of tests taken)
 
     const resp_data = respiratory_data.docs.map(doc => doc.data());
-    console.log(resp_data.length); // array of cities objects
-    console.log(resp_data[0]);
+
     resp_data.sort(function (x, y) {
       return x.time.seconds - y.time.seconds;
     })
@@ -84,12 +80,6 @@ class Dashboard extends Component {
 
       }
     }
-    console.log(countNormal);
-    console.log(countBoth);
-    console.log(countWheezes);
-    console.log(countCrackles);
-
-
     this.setState(
       {
         resp_tests: resp_data.length,
@@ -99,15 +89,7 @@ class Dashboard extends Component {
 
     );
 
-    //Get data from Respiratory Documents
-
-
-    //Get Latest Doc from array according to timestamp
-
-    //Get size of the array (No. of tests taken)
-
-
-    //
+    //Pie chart values for Fall
     const stateFall = {
       labels: ['Fall', 'No-Fall'],
       datasets: [
@@ -128,6 +110,7 @@ class Dashboard extends Component {
       ]
     }
 
+    //Pie Chart values
     const stateResp = {
       labels: ['Normal', 'Crackles', 'Wheezes', 'Crackles & Wheezes'],
       datasets: [
