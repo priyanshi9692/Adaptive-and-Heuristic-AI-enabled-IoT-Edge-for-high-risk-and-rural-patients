@@ -80,10 +80,12 @@ public class MainActivity extends AppCompatActivity {
             // The user is new, show them a fancy intro screen!
             Toast.makeText(MainActivity.this, "new user",
                     Toast.LENGTH_LONG).show();
+            Intent myIntent = new Intent(MainActivity.this, UserProfileActivity.class);
+            MainActivity.this.startActivity(myIntent);
         } else {
             // This is an existing user, show them a welcome back screen.
-            Toast.makeText(MainActivity.this, "old user",
-                    Toast.LENGTH_LONG).show();
+//            Toast.makeText(MainActivity.this, "old user",
+//                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -125,6 +127,10 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show();
                     }
                 });
+                return true;
+            case R.id.user_profile:
+                Intent myIntent = new Intent(MainActivity.this, UserProfileActivity.class);
+                MainActivity.this.startActivity(myIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

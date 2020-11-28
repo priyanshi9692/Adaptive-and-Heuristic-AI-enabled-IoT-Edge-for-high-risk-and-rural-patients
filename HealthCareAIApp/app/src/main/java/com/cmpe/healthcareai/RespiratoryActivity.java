@@ -232,8 +232,6 @@ public class RespiratoryActivity extends AppCompatActivity {
                 py = Python.getInstance();
                 pyobj = py.getModule("featureExtraction");
             }
-
-
             String src = urls[0].getPath();
             String[] path = src.split(":");
             PyObject obj = pyobj.callAttr("build_feat",path[1]);

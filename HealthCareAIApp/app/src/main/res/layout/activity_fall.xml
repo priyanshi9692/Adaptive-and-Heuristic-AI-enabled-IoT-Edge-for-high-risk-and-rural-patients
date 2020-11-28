@@ -5,5 +5,67 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".FallActivity">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView_fall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="234dp"
+        app:layout_constraintBottom_toTopOf="@+id/selectAudioBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/card_view_title_fall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Collecting Sensor data..."
+                android:textSize="24dp"
+                android:layout_margin="2dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/card_view_result_fall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimary"
+                    android:gravity="center"
+                    android:text="Text 2"
+                    android:visibility="invisible"
+                    android:textSize="20dp"
+                    />
+                <ProgressBar
+                    android:id="@+id/progress_bar_fall"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"/>
 
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+<!--    <Button-->
+<!--        android:id="@+id/detectFallBtn"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginBottom="243dp"-->
+<!--        android:onClick="onDetectFallClicked"-->
+<!--        android:text="Detect Fall"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.498"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/cardView"-->
+<!--        app:layout_constraintVertical_bias="0.644" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

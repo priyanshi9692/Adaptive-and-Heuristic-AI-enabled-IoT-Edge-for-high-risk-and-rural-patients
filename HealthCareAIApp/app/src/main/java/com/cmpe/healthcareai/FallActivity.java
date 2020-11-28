@@ -8,6 +8,9 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -48,13 +51,15 @@ public class FallActivity extends AppCompatActivity {
     String[] sensorData = new String[sensorDataCount];
     int count = 0;
     Interpreter tflite;
+    ProgressBar progressBar;
+    TextView titleTV, resultTV;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fall);
-
-        Toast.makeText(FallActivity.this, "In Fall activity",
-                Toast.LENGTH_LONG).show();
+        progressBar = findViewById(R.id.progress_bar_fall);
+        titleTV = findViewById(R.id.card_view_title_fall);
+        resultTV = findViewById(R.id.card_view_result_fall);
 
         Log.d( "-----","The onCreate() event");
 
@@ -109,6 +114,7 @@ public class FallActivity extends AppCompatActivity {
         }
         public void onSensorChanged(SensorEvent event) {
             if(count ==sensorDataCount){
+                progressBar.setProgress(count);
                 mSensorManager.unregisterListener(sensorEventListener);
                 Log.d( "-----","sensors unregisterListener as sensorDataCount records read");
               List<List<Float>> result = new ArrayList<>();
@@ -158,16 +164,19 @@ public class FallActivity extends AppCompatActivity {
         float inferredValue = output[0][0];
         Log.d("Value: ", String.valueOf(inferredValue));
         int result = Math.round(inferredValue);
-
-        Toast.makeText(FallActivity.this, "Result: "+result,
-                Toast.LENGTH_SHORT).show();
+        
         Log.d("Result: ", String.valueOf(result));
         String smsMsg = "";
+        titleTV.setText("Prediction");
+        progressBar.setIndeterminate(false);
+        progressBar.setProgress(100);
+        resultTV.setVisibility(View.VISIBLE);
         if (inferredValue > 0.5) {
             Log.d("Result: ", " It's Fall");
             smsMsg = " It's Fall";
             addDataToFirestore("FALL");
             sendSMS(phoneNumber,smsMsg);
+            resultTV.setText("Fall");
             return 1;
 
         } else {
@@ -175,6 +184,7 @@ public class FallActivity extends AppCompatActivity {
             smsMsg = "No Fall";
             addDataToFirestore("NO_FALL");
             sendSMS(phoneNumber, smsMsg);
+            resultTV.setText("No Fall");
             return 0;
         }
 
@@ -617,7 +627,7 @@ private MappedByteBuffer loadModelFile() throws IOException {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d("TAG", "DocumentSnapshot added with ID: " + documentReference.getId());
-                        Toast.makeText(FallActivity.this, "Fall/No-Fall result synced to cloud",
+                        Toast.makeText(FallActivity.this, "Result synced to cloud",
                                 Toast.LENGTH_SHORT).show();
                     }
                 })
@@ -629,6 +639,11 @@ private MappedByteBuffer loadModelFile() throws IOException {
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    public void onDetectFallClicked(View view){
+        Toast.makeText(FallActivity.this, "onDetectFallClicked",
+                Toast.LENGTH_SHORT).show();
     }
 }
 
