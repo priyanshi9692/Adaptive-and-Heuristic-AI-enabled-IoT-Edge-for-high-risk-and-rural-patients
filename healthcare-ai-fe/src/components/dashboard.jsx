@@ -46,15 +46,12 @@ class Dashboard extends Component {
     );
     // firebase.auth().currentUser.email
     //Get Latest Doc from array according to timestamp
-    const respiratory_collection = db.collection("respiratory")
-    var respiratory_data = await respiratory_collection.where("email", "==", firebase.auth().currentUser.email).get();
-    //Get size of the array (No. of tests taken)
-
-    const resp_data = respiratory_data.docs.map(doc => doc.data());
-
-    resp_data.sort(function (x, y) {
-      return x.time.seconds - y.time.seconds;
-    })
+const respiratory_collection = db.collection("respiratory")
+var respiratory_data = await respiratory_collection.where("email", "==", firebase.auth().currentUser.email).get();
+const resp_data = respiratory_data.docs.map(doc => doc.data());
+resp_data.sort(function (x, y) {
+  return x.time.seconds - y.time.seconds;
+  })
     var d = new Date(resp_data[resp_data.length - 1].time.seconds * 1000);
     var resp_result = ""
     resp_result = resp_data[resp_data.length - 1].result == "No abnormalities were detected" ? "Healthy" : "Unhealthy";
@@ -235,7 +232,7 @@ class Dashboard extends Component {
                   },
                   legend: {
                     display: true,
-                    position: 'bottom'
+                    position: 'top'
                   }
                 }}
                 height='100%'
@@ -255,7 +252,7 @@ class Dashboard extends Component {
 
                   legend: {
                     display: true,
-                    position: 'bottom'
+                    position: 'top'
                   }
                 }}
                 height='100%'
