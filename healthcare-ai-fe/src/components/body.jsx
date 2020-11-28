@@ -17,7 +17,7 @@ class Body extends Component {
           <div class="card m-2" style={{ width: "15rem" }}>
             <img class="card-img-top " src={photoURL} alt="Card image cap" />
             <div class="card-body">
-              <h5 class="card-title">{displayName}</h5>
+              <h6 class="card-title">{displayName}</h6>
               <p class="card-text">{email}</p>
             </div>
           </div>

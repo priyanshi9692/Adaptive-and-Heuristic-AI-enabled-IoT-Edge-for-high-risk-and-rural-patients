@@ -24,9 +24,15 @@ class TestResults extends Component {
     //Get data from Fall Documents
     var fall_data = await fall_collection.where("email","==",firebase.auth().currentUser.email).get();
     const data = fall_data.docs.map(doc => doc.data());
+    data.sort(function (x, y) {
+      return y.time.seconds - x.time.seconds ;
+    })
     const respiratory_collection = db.collection("respiratory")
     var respiratory_data = await respiratory_collection.where("email", "==",firebase.auth().currentUser.email).get();
     const resp_data = respiratory_data.docs.map(doc => doc.data());
+    resp_data.sort(function (x, y) {
+      return y.time.seconds - x.time.seconds;
+    })
     this.setState(
         {
           fallData: data,
@@ -37,7 +43,7 @@ class TestResults extends Component {
 
   renderTableData() {
     return this.state.fallData.map((fallData, index) => {
-       const { email, result, time} = fallData //destructuring
+       const { email, result, time} = fallData
        var d = new Date(time.seconds * 1000);
        var fallResult = "";
        if(result=="FALL" || result == "1"){
@@ -58,12 +64,6 @@ class TestResults extends Component {
     return this.state.respData.map((respData, index) => {
        const { email, result, time} = respData //destructuring
        var d = new Date(time.seconds * 1000);
-       var fallResult = "";
-    //    if(result=="FALL" || result == "1"){
-    //         fallResult = "Fall";
-    //    }else{
-    //     fallResult = "No Fall";
-    //    }
        return (
           <tr key={email}>
             <td>{d.toLocaleString()}</td>
@@ -106,7 +106,7 @@ class TestResults extends Component {
         <div class = "row">
             <div class = "col-md-6">
         <h4 id='title' style = {component_style}>Fall Test History</h4>
-            <table id='students'>
+            <table id='testTable'>
                <tbody>
                <tr>
                 <th>Timestamp</th>
@@ -119,7 +119,7 @@ class TestResults extends Component {
         </div>
         <div class = "col-md-6">
         <h4 id='title' style = {component_style}>Respiratory Test History</h4>
-            <table id='students'>
+            <table id='testTable'>
                <tbody>
                <tr>
                     <th>Timestamp</th>
