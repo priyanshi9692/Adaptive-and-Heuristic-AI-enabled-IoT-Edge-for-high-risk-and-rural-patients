@@ -5,10 +5,10 @@ import Body from "./components/body";
 import firebase from "firebase";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 
-firebase.initializeApp({
-  apiKey: "AIzaSyCMssWHvsze0yxdJ6UDGzaeRm2KWU0s-ys",
-  authDomain: "healthcareai-cmpe295.firebaseapp.com"
-});
+// firebase.initializeApp({
+//   apiKey: "AIzaSyCMssWHvsze0yxdJ6UDGzaeRm2KWU0s-ys",
+//   authDomain: "healthcareai-cmpe295.firebaseapp.com"
+// });
 
 class App extends Component {
   state = {
